@@ -4,8 +4,6 @@
 //!
 //! This module contains the core type definitions used throughout the simulator.
 
-use unicode_normalization::UnicodeNormalization;
-
 // Type modules
 mod id;
 mod gender;
@@ -56,8 +54,37 @@ pub fn to_id(text: &str) -> String {
     // Normalize to NFD (decomposed form) to match JSON data format
     // This ensures "é" (U+00E9) becomes "e" + "́" (U+0301)
     // Then we filter for ASCII characters, keeping the base letter
-    text.nfd()
+    /*
+    let reference = text.nfd()
         .filter(|c| c.is_ascii_alphanumeric())
         .map(|c| c.to_ascii_lowercase())
-        .collect()
+        .collect::<String>();
+    assert_eq!(reference.as_bytes(), other.as_slice());
+    reference
+    */
+    let mut out = Vec::<u8>::with_capacity(text.len());
+    let s = out.spare_capacity_mut();
+    let mut out_i = 0;
+    static LUT: [u8; 256] = {
+        let mut t = [0u8; 256];
+        let mut i = 0u8;
+        while i < 128 {
+            t[i as usize] = match i {
+                b'a'..=b'z' | b'0'..=b'9' => i,
+                b'A'..=b'Z' => i.to_ascii_lowercase(),
+                _ => 0,
+            };
+            i += 1;
+        }
+        t
+    };
+    unsafe {
+        for &b in text.as_bytes() {
+            let b = LUT[b as usize];
+            s.get_unchecked_mut(out_i).write(b);
+            out_i += (b != 0) as usize;
+        }
+        out.set_len(out_i);
+        String::from_utf8_unchecked(out)
+    }
 }
