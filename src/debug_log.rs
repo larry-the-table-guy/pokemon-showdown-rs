@@ -35,7 +35,8 @@ macro_rules! debug_elog {
 #[cfg(not(feature = "debug-logging"))]
 #[macro_export]
 macro_rules! debug_elog {
-    ($($arg:tt)*) => {
-        ()
+    ($fmt: literal) => {};
+    ($fmt: literal, $($arg:expr),*) => {
+        {$(_ = & $arg;)*}
     };
 }
