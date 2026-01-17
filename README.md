@@ -20,7 +20,7 @@ user	2m46.884s
 sys	    0m0.089s
 ```
 
-#### Head (`b2c9a9fed0f94b81b2f932a017e0bb3255b9a6b7`)
+#### Head
 
 ```
 real	0m13.403s
